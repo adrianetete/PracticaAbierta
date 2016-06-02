@@ -6,7 +6,6 @@ Martes 9/2/2016
 PRACTICA A
 Hemos comenzado con la primera práctica, descargando e instalando Virtualbox y los archivos de disco Minix y el disquete con el núcleo. Hemos creado la maquina virtual añadiendo el disquete y teniendo en cuenta el orden en el que esta iba a arrancar. Desactivado arranque por CD. Arrancamos la maquina y accedemos por primera vez como root. Conseguimos cambiar entre terminales con alt + Fi.
 Tutorial de vi:
-
 - esc	: Cambiamos de edición a modo comandos.
 		- i	: Cambiamos a modo edición en la posición del cursor.
 		-a	: Cambiamos a modo edición en la siguiente posición a la del cursor.
@@ -21,10 +20,9 @@ Tutorial de vi:
 		-%	: Cambia entre parejas de corchetes.
 		-u 	: Deshacer.
 		-!	: Forzar comando.
-		-ps -alx :Procesos en ejecución.
 		-xG	:Ir a la línea x.
 		-:r	:nombreDeFichero: copia un fichero desde la posición de cursor.
-		-:set number :Muestra el número de linea en el archivo que estamos viendo.
+		-:set number :Muestra el número de línea en el archivo que estamos viendo.
 Continuando con la práctica, copiamos los archivos de imagen y disquete en otro directorio y cambiamos el UUID con "VBoxManage internalcommands sethuuid minix...vdi"
 
 Cambiamos el shell por defecto a ash, editando /etc/passwd y sustituyendo sh por ash en la primera línea, creamos otro usuario añadiendo la linea "login:contraseña:9:3: Datos usuario:Directorio del usuario:"
@@ -178,6 +176,7 @@ Acaba proceso ligero (1 segundo)
 Comprobado, todo funciona correctamente. EXPLICACION: Al cambiar el cuanto lo que conseguimos es cambiar de RR a FIFO, por tanto hasta que no finalice un proceso, no empieza el siguiente. Aquí se acaba la práctica D.
 
 Martes 12/4/2016
+
 PRACTICA E
 Empezamos la practica E. Para ellos nos dirigimos al gestor de memoria de minix en /usr/src/mm/. Como tenemos que imprimir la lista hole_head y la tabla de segmentos de las tareas del sistema cuando se inicie la memoria, nos dirigimos al archivo /usr/src/mm/alloc.c donde estan definidos el numero de holes asi como su estructura (almacena dónde empieza, qué tamaño tiene y un puntero hacia el siguiente).
 Tenemos que llamar a la funcion que creemos desde /usr/src/mm/main.c:mm_init(). 
@@ -198,6 +197,7 @@ Aunque parezca difícil y después de mucho darle vuelta a algunos problemas hem
 
 
 Martes 26/4/2016
+
 PRACTICA ABIERTA
 Hemos decidido que la práctica que vamos a realizar sea la gestión de memoria en minix. Dentro de la función /usr/src/alloc.c:alloc_mem() se encuentra la forma en la que gestiona minix la memoria. Este método por defecto, usa el algoritmo “first fit”. Recibe como parámetro el tamaño que ocupa un proceso (en clicks), y procede a buscar el hueco en la tabla de agujeros libres según uno de los siguientes métodos:
 First-Fit: Al recorrer la tabla asigna el primer agujero que encuentra con espacio disponible para ubicar el proceso.
@@ -213,11 +213,13 @@ Do_fork: maneja la llamada al sistema FORK. Recibe el puntero al proceso padre c
 ………
 
 Martes 3/5/2016
+
 Creamos una nueva variable alfanumérica llamada CAMBIA_MEM. Modificamos el distribuidor de memoria que teníamos que /usr/src/mm/utility.c y añadimos un nuevo caso al switch para que llame al método que va a cambiar la variable global gestor_mem. El método encargado de esta tarea será cambia_mem() en /usr/src/mm/utility.c 
 Lo siguiente que haremos será comenzar a modificar alloc_mem para que elija el algoritmo de planificación de memoria en función de la variable global que hemos definido anteriormente, para ello implementaremos una función que será la invocada desde forkexit.c y exec.c, la cual comprobará el valor de la variable gestor_mem y en función de este cambiará el algoritmo de asignación de memoria.
 Comenzamos creando el algoritmo “Best Fit” en /usr/src/mm/alloc.c en una función llamada alloc_mem_BF, lo que hará esta función será recorrer la lista de holes y elegir el agujero mas pequeño en el que cabe el proceso, para ello compararemos cada agujero con el tamaño del proceso y con el tamaño del agujero anterior, eligiendo el menor entre estos dos y repitiendo el proceso.
 
 Martes 10/5/2016
+
 Una vez que tenemos hecho el código para Best Fit guardamos el estado del disco duro por si nos lo cargamos, compilamos (compila a la primera), y cambiamos las llamadas a la funcion /usr/src/mm/alloc.c:alloc_mem directamente en /usr/src/mm/forkexit.c y /usr/src/mm/exec.c. Lo haremos así solo por esta vez, mas adelante crearemos un distribuidor. Reiniciamos la maquina y aparentemente funciona todo correctamente.
 Ahora que sabemos que Best Fit no da errores (no sabemos si aun funciona) volvemos a cambiar el código anterior que modificamos en forkexit.c y exec.c para que carge siempre el código por defecto de minix (First Fit). En alloc.c hacemos un distribuidor sencillo con un switch que, basándose en la variable global “gestor_mem”, llama a las distintas funciones seleccionando el tipo de gestión de memoria que queremos: First Fit, Best Fit o Worst Fit. El camino de gestion de memoria es el siguiente:
 Se crea un proceso mediante fork que llama a la funcion alloc.c:alloc_mem() enviando el tamaño en clicks del proceso.
@@ -238,15 +240,32 @@ Ponemos unos cuantos printf para seguir el camino de gestion de memoria y asi ve
 
 
 Domingo 15/5/2016
+
 Lo que vamos a hacer ahora es modificar el programa de una práctica anterior que calculaba números primos para que al principio muestre la tabla de agujeros vacíos y durante la ejecución vaya creando los procesos uno a uno. Asi podemos ver qué proceso se crea, cuánto ocupa y en qué agujero se mete. 
 Probando el mismo programa con los distintos métodos de gestión de memoria parece que funciona todo como debe ser. También corregimos un error a la hora de mostrar los huecos libres, que no mostraba los clicks del tamaño del hueco bien. Ahora usamos la función de minix click_to_round_k() y ya lo muestra bien.
+
 Martes 17/5/2016
+
 Comenzamos a implementar otro algoritmo, en este caso será Last Fit que alojará el proceso en el último hole de la lista en el que entre. Conseguimos implementar este nuevo algoritmo, a mayores hemos sustituido en el distribuidor (alloc_mem) los enteros del switch por variables alfanuméricas. Comprobamos que funciona.
 
 Viernes 20/5/2016
+
 Empezamos a implementar el siguiente algoritmo, en este caso será NEXTFIT que consistirá en guardar el último hole en el que hemos alojado el último proceso y cuando tengamos que asignar memoria comenzaremos a recorrer hole_head desde el hole que hemos guardado.
-Lo primero que hacemos es definir una variable global en glo.h de tipo struct hole, que será donde guardemos el hole que hemos utilizado. Conseguimos implementar un primer algoritmo medianamente funcional aunque tenemos un problema, si dejase de haber holes disponibles el algoritmo quedaría en un bucle infinito recorriendo toda la tabla de holes.
+Lo primero que hacemos es definir una variable global en glo.h de tipo struct hole, que será donde guardemos el hole que hemos utilizado. 
 
 Martes 24/5/2016
 
 Continuando con el algoritmo Nextfit, intentamos solventar el problema que teniamos añadiendo un contador y limitando las vueltas del bucle con el numero máximo de entradas de la table NR_HOLES. Probamos el algoritmo con la carga de trabajo del calculo de primos que no nos permite ver con claridad si de verdad funciona, sin embargo vemos que al cambiar de un algoritmo a otro se crean procesos de distintos tamaños y los aloja siguiendo el patrón next fit establecido correctamente.
+
+Sábado 28/5/2016
+
+Empezamos a crear una carga de trabajo con procesos de distintos pesos para comprobar como los distintos algoritmos asignan memoria a procesos de distintos tamaños, para ello crearemos un proceso ligero, uno mediano y uno pesado y los ejecutaremos desde un comando intercalando MemLibre antes y después de cada proceso para ver como se alojan en la memoria. Creamos un proceso ligero.
+
+
+Martes 31/5/2016
+
+Empezamos con la creacion de un proceso Mediano que creará varias veces un proces pequeño y uno grande a continuacion. Abortamos misión, Benja nos sugiere que en vez de crear procesos de distintos tamaños creemos una variable de monitorización del sistema, de manera que cuando tenga un valor determinado imprima los huecos libres, el tamaño del proceso que se va a alojar y al terminar vuelva a imprimir los huecos libres. Si la variable tiene el segundo valor, no "monitorizará" el sistema.
+
+Miercoles 1/6/2016 
+
+Creamos una constante alfanumérica en callnr.h llamada MONITOR que tendrá valor 6, la usaremos para gestionar la llamada a la función que cambiará la constante global monitor encargada de activar o desactivar la monitorización, esta estará definida en /usr/src/mm/glo.h,  
